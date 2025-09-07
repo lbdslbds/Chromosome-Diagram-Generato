@@ -18,7 +18,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
-          script-name: Chromosome-Diagram-Generator.py # ⚠️ 请将此项替换为你的实际脚本名称 ⚠️
+          script-name: Chromosome-Diagram-Generator.py 
           mode: app
           
       # Uploads artifact
@@ -26,5 +26,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: exe
-          path: Chromosome-Diagram-Generator.exe # ⚠️ 请确保此路径与你的脚本名称匹配 ⚠️
+          path: build/Chromosome-Diagram-Generator.exe 
           include-hidden-files: true
