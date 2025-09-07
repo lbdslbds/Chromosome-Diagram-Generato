@@ -1,0 +1,10 @@
+name: PyInstaller Windows
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: JackMcKew/pyinstaller-action-windows@v0.1.2
+      with:
+        path: src # default is src
