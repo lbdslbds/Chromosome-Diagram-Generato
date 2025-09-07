@@ -3,14 +3,14 @@ import tkinter as tk
 from tkinter import ttk, colorchooser, filedialog
 import os
 
-def draw_chromosome(genes, colors, show_xy, file_path):
+def draw_chromosome(genes, colors, marker_choice, file_path):
     """
     根据给定的基因、颜色和选项绘制染色体图像。
 
     Args:
         genes (dict): 包含基因名称的字典。
         colors (dict): 包含背景和染色体颜色的字典。
-        show_xy (bool): 是否显示XY标记。
+        marker_choice (str): 底部标记的类型 ("None", "XY", "XX")。
         file_path (str): 图像的保存路径。
     """
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -39,24 +39,24 @@ def draw_chromosome(genes, colors, show_xy, file_path):
         return style
 
     # --- 绘制左边的染色体 ---
-    ax.plot([0.3, 0.3]， [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
+    ax.plot([0.3, 0.3], [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
     # 仅当对应位置有基因时才绘制染色体臂
     if genes['left_top']:
-        ax.plot([0.2, 0.4]， [0.75, 0.75], color=line_color, linewidth=line_width, solid_capstyle='round')
+        ax.plot([0.2, 0.4], [0.75, 0.75], color=line_color, linewidth=line_width, solid_capstyle='round')
     if genes['left_middle']:
-        ax.plot([0.2, 0.4]， [0.5, 0.5], color=line_color, linewidth=line_width, solid_capstyle='round')
+        ax.plot([0.2, 0.4], [0.5, 0.5], color=line_color, linewidth=line_width, solid_capstyle='round')
     if genes['left_bottom']:
-        ax.plot([0.2, 0.4]， [0.25, 0.25], color=line_color, linewidth=line_width, solid_capstyle='round')
+        ax.plot([0.2, 0.4], [0.25, 0.25], color=line_color, linewidth=line_width, solid_capstyle='round')
 
     # --- 绘制右边的染色体 ---
-    ax.plot([0.7, 0.7]， [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
+    ax.plot([0.7, 0.7], [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
     # 仅当对应位置有基因时才绘制染色体臂
     if genes['right_top']:
-        ax.plot([0.6, 0.8]， [0.75, 0.75], color=line_color, linewidth=line_width, solid_capstyle='round')
+        ax.plot([0.6, 0.8], [0.75, 0.75], color=line_color, linewidth=line_width, solid_capstyle='round')
     if genes['right_middle']:
-        ax.plot([0.6, 0.8]， [0.5, 0.5], color=line_color, linewidth=line_width, solid_capstyle='round')
+        ax.plot([0.6, 0.8], [0.5, 0.5], color=line_color, linewidth=line_width, solid_capstyle='round')
     if genes['right_bottom']:
-        ax.plot([0.6, 0.8]， [0.25, 0.25], color=line_color, linewidth=line_width, solid_capstyle='round')
+        ax.plot([0.6, 0.8], [0.25, 0.25], color=line_color, linewidth=line_width, solid_capstyle='round')
 
     # --- 添加等位基因标签 (仅当文本框不为空时绘制) ---
     if genes['left_top']:
@@ -79,10 +79,13 @@ def draw_chromosome(genes, colors, show_xy, file_path):
         font_style = get_adaptive_font_style(genes['right_bottom'])
         ax.text(0.915, 0.25, genes['right_bottom'], fontdict=font_style, ha='center', va='center')
 
-    # --- 标记XY染色体 ---
-    if show_xy:
+    # --- 标记染色体 ---
+    if marker_choice == "XY":
         ax.text(0.3, 0.0, 'X', fontdict=base_font_style, ha='center', va='center')
         ax.text(0.7, 0.0, 'Y', fontdict=base_font_style, ha='center', va='center')
+    elif marker_choice == "XX":
+        ax.text(0.3, 0.0, 'X', fontdict=base_font_style, ha='center', va='center')
+        ax.text(0.7, 0.0, 'X', fontdict=base_font_style, ha='center', va='center')
 
     # --- 美化和显示 ---
     ax.set_xlim(0, 1)
@@ -111,9 +114,9 @@ def create_gui():
     }
     color_vars = {
         'background': tk.StringVar(value='#FFFFFF'),
-        'chromosome': tk.StringVar(value='#000000')
+        'chromosome': tk.StringVar(value='#403A3A')
     }
-    show_xy_var = tk.BooleanVar(value=False)
+    marker_choice_var = tk.StringVar(value="None")
     status_var = tk.StringVar(value="")
     save_path_var = tk.StringVar(value="")
 
@@ -156,7 +159,13 @@ def create_gui():
     create_color_picker(options_frame, "背景颜色", color_vars['background'], '#FFFFFF', 0, 0)
     create_color_picker(options_frame, "染色体颜色", color_vars['chromosome'], '#403A3A', 0, 1)
 
-    ttk.Checkbutton(options_frame, text="在底部生成XY标记", variable=show_xy_var).grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
+    # --- 染色体标记 ---
+    marker_frame = ttk.Frame(options_frame)
+    marker_frame.grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
+    ttk.Label(marker_frame, text="底部标记:").pack(side=tk.LEFT, padx=(0, 10))
+    ttk.Radiobutton(marker_frame, text="无", variable=marker_choice_var, value="None").pack(side=tk.LEFT)
+    ttk.Radiobutton(marker_frame, text="XY", variable=marker_choice_var, value="XY").pack(side=tk.LEFT)
+    ttk.Radiobutton(marker_frame, text="XX", variable=marker_choice_var, value="XX").pack(side=tk.LEFT)
 
     # --- 保存位置 ---
     def select_save_path():
@@ -189,8 +198,8 @@ def create_gui():
         try:
             genes_to_draw = {key: var.get().strip() for key, var in gene_vars.items()}
             colors_to_draw = {key: var.get() for key, var in color_vars.items()}
-            show_xy = show_xy_var.get()
-            draw_chromosome(genes_to_draw, colors_to_draw, show_xy, file_path)
+            marker_choice = marker_choice_var.get()
+            draw_chromosome(genes_to_draw, colors_to_draw, marker_choice, file_path)
             status_var.set(f"图像已保存到: {os.path.basename(file_path)}")
         except Exception as e:
             status_var.set(f"发生错误: {e}")
