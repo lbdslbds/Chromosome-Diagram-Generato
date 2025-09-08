@@ -22,6 +22,7 @@ jobs:
           nuitka-version: main
           script-name: Chromosome-Diagram-Generator.py 
           mode: app
+          enable-plugins: tk-inter
           
       # Uploads artifact
       - name: Upload Artifact
