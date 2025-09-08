@@ -1,5 +1,10 @@
 name: Nuitka Windows
+# 触发条件：当一个以 'v' 开头的标签被推送到仓库时
 on:
+  push:
+    tags:
+      - 'v*'
+  # 仍然保留手动触发选项，方便测试
   workflow_dispatch:
 jobs:
   build:
@@ -23,7 +28,15 @@ jobs:
           script-name: Chromosome-Diagram-Generator.py 
           mode: app
           enable-plugins: tk-inter
-          
+      # 5. 创建 GitHub Release 并上传 .exe 文件
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          # files 参数指向你刚刚构建好的 .exe 文件
+          files: build/Chromosome-Diagram-Generator.exe
+          # GITHUB_TOKEN 是自动提供的，无需手动设置
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
       # Uploads artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
