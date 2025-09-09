@@ -9,10 +9,13 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    
+    permissions:
+      contents: write
     steps:
       # Check-out repository
       - uses: actions/checkout@v4
-
+    
       # Setup Python
       - uses: actions/setup-python@v5
         with:
