@@ -8,7 +8,7 @@ import os
 class ChromosomeApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("基因绘图生成器 Pro")
+        self.root.title("基因绘图生成器")
         self.root.geometry("900x650")  # 增大窗口以容纳预览
 
         # --- 数据模型 ---
