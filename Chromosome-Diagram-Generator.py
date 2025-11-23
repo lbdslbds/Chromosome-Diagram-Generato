@@ -1,216 +1,201 @@
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 import tkinter as tk
-from tkinter import ttk, colorchooser, filedialog
+from tkinter import ttk, colorchooser, filedialog, messagebox
 import os
 
-def draw_chromosome(genes, colors, marker_choice, file_path):
-    """
-    根据给定的基因、颜色和选项绘制染色体图像。
+class ChromosomeApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("基因绘图生成器 Pro")
+        self.root.geometry("900x650")  # 增大窗口以容纳预览
 
-    Args:
-        genes (dict): 包含基因名称的字典。
-        colors (dict): 包含背景和染色体颜色的字典。
-        marker_choice (str): 底部标记的类型 ("None", "XY", "XX")。
-        file_path (str): 图像的保存路径。
-    """
-    fig, ax = plt.subplots(figsize=(6, 6))
+        # --- 数据模型 ---
+        self.gene_vars = {
+            'left_top': tk.StringVar(value='d'),
+            'left_middle': tk.StringVar(value=''),
+            'left_bottom': tk.StringVar(value='E'),
+            'right_top': tk.StringVar(value='d'),
+            'right_middle': tk.StringVar(value=''),
+            'right_bottom': tk.StringVar(value='E')
+        }
+        self.color_vars = {
+            'background': tk.StringVar(value='#FFFFFF'),
+            'chromosome': tk.StringVar(value='#403A3A')
+        }
+        self.marker_choice_var = tk.StringVar(value="None")
 
-    # --- 设置颜色 ---
-    fig.set_facecolor(colors['background'])
-    ax.set_facecolor(colors['background'])
-    line_color = colors['chromosome']
-
-    # --- 绘图常量 ---
-    line_width = 16
-    base_font_style = {'family': 'serif', 'fontsize': 35, 'color': 'black'}
-
-    # --- 自适应字体大小的辅助函数 ---
-    def get_adaptive_font_style(text):
-        """根据文本长度调整字体大小"""
-        style = base_font_style.copy()
-        length = len(str(text))
-        if length > 4:
-            style['fontsize'] = 18
-        elif length > 2:
-            style['fontsize'] = 22
-        elif length > 1:
-            style['fontsize'] = 28
-        # 如果长度为1，则使用默认的35
-        return style
-
-    # --- 绘制左边的染色体 ---
-    ax.plot([0.3, 0.3], [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
-    # 仅当对应位置有基因时才绘制染色体臂
-    if genes['left_top']:
-        ax.plot([0.2, 0.4], [0.75, 0.75], color=line_color, linewidth=line_width, solid_capstyle='round')
-    if genes['left_middle']:
-        ax.plot([0.2, 0.4], [0.5, 0.5], color=line_color, linewidth=line_width, solid_capstyle='round')
-    if genes['left_bottom']:
-        ax.plot([0.2, 0.4], [0.25, 0.25], color=line_color, linewidth=line_width, solid_capstyle='round')
-
-    # --- 绘制右边的染色体 ---
-    ax.plot([0.7, 0.7], [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
-    # 仅当对应位置有基因时才绘制染色体臂
-    if genes['right_top']:
-        ax.plot([0.6, 0.8], [0.75, 0.75], color=line_color, linewidth=line_width, solid_capstyle='round')
-    if genes['right_middle']:
-        ax.plot([0.6, 0.8], [0.5, 0.5], color=line_color, linewidth=line_width, solid_capstyle='round')
-    if genes['right_bottom']:
-        ax.plot([0.6, 0.8], [0.25, 0.25], color=line_color, linewidth=line_width, solid_capstyle='round')
-
-    # --- 添加等位基因标签 (仅当文本框不为空时绘制) ---
-    if genes['left_top']:
-        font_style = get_adaptive_font_style(genes['left_top'])
-        ax.text(0.1, 0.75, genes['left_top'], fontdict=font_style, ha='center', va='center')
-    if genes['left_middle']:
-        font_style = get_adaptive_font_style(genes['left_middle'])
-        ax.text(0.1, 0.5, genes['left_middle'], fontdict=font_style, ha='center', va='center')
-    if genes['left_bottom']:
-        font_style = get_adaptive_font_style(genes['left_bottom'])
-        ax.text(0.085, 0.25, genes['left_bottom'], fontdict=font_style, ha='center', va='center')
-
-    if genes['right_top']:
-        font_style = get_adaptive_font_style(genes['right_top'])
-        ax.text(0.9, 0.75, genes['right_top'], fontdict=font_style, ha='center', va='center')
-    if genes['right_middle']:
-        font_style = get_adaptive_font_style(genes['right_middle'])
-        ax.text(0.9, 0.5, genes['right_middle'], fontdict=font_style, ha='center', va='center')
-    if genes['right_bottom']:
-        font_style = get_adaptive_font_style(genes['right_bottom'])
-        ax.text(0.915, 0.25, genes['right_bottom'], fontdict=font_style, ha='center', va='center')
-
-    # --- 标记染色体 ---
-    if marker_choice == "XY":
-        ax.text(0.3, 0.0, 'X', fontdict=base_font_style, ha='center', va='center')
-        ax.text(0.7, 0.0, 'Y', fontdict=base_font_style, ha='center', va='center')
-    elif marker_choice == "XX":
-        ax.text(0.3, 0.0, 'X', fontdict=base_font_style, ha='center', va='center')
-        ax.text(0.7, 0.0, 'X', fontdict=base_font_style, ha='center', va='center')
-
-    # --- 美化和显示 ---
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.set_aspect('equal', adjustable='box')
-    ax.axis('off')
-
-    plt.savefig(file_path, dpi=300, facecolor=fig.get_facecolor())
-    plt.close()
-
-
-def create_gui():
-    """创建并显示GUI窗口。"""
-    root = tk.Tk()
-    root.title("基因绘图选项")
-    root.resizable(False, False)
-
-    # --- 变量 ---
-    gene_vars = {
-        'left_top': tk.StringVar(value='d'),
-        'left_middle': tk.StringVar(value=''),
-        'left_bottom': tk.StringVar(value='E'),
-        'right_top': tk.StringVar(value='d'),
-        'right_middle': tk.StringVar(value=''),
-        'right_bottom': tk.StringVar(value='E')
-    }
-    color_vars = {
-        'background': tk.StringVar(value='#FFFFFF'),
-        'chromosome': tk.StringVar(value='#403A3A')
-    }
-    marker_choice_var = tk.StringVar(value="None")
-    status_var = tk.StringVar(value="")
-    save_path_var = tk.StringVar(value="")
-
-    # --- GUI 布局 ---
-    main_frame = ttk.Frame(root, padding="15")
-    main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-
-    # --- 基因定义区 ---
-    gene_frame = ttk.LabelFrame(main_frame, text="基因定义", padding="10")
-    gene_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-
-    ttk.Label(gene_frame, text="左边染色体", font="-weight bold").grid(column=0, row=0, pady=5)
-    ttk.Label(gene_frame, text="右边染色体", font="-weight bold").grid(column=1, row=0, pady=5, padx=20)
-
-    ttk.Entry(gene_frame, textvariable=gene_vars['left_top'], width=15).grid(column=0, row=1, pady=2)
-    ttk.Entry(gene_frame, textvariable=gene_vars['right_top'], width=15).grid(column=1, row=1, pady=2, padx=20)
-    ttk.Entry(gene_frame, textvariable=gene_vars['left_middle'], width=15).grid(column=0, row=2, pady=2)
-    ttk.Entry(gene_frame, textvariable=gene_vars['right_middle'], width=15).grid(column=1, row=2, pady=2, padx=20)
-    ttk.Entry(gene_frame, textvariable=gene_vars['left_bottom'], width=15).grid(column=0, row=3, pady=2)
-    ttk.Entry(gene_frame, textvariable=gene_vars['right_bottom'], width=15).grid(column=1, row=3, pady=2, padx=20)
-    
-    # --- 选项区 ---
-    options_frame = ttk.LabelFrame(main_frame, text="选项", padding="10")
-    options_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=10)
-
-    def create_color_picker(parent, text, var, initial_color, row, col):
-        frame = ttk.Frame(parent)
-        frame.grid(row=row, column=col, padx=5, pady=5, sticky=tk.W)
+        # --- 布局 ---
+        # 左侧面板：控制区
+        left_panel = ttk.Frame(root, padding="10")
+        left_panel.pack(side=tk.LEFT, fill=tk.Y)
         
-        def pick_color():
-            color_code = colorchooser.askcolor(title="选择颜色", initialcolor=var.get())
-            if color_code and color_code[1]:
-                var.set(color_code[1])
-                color_display.config(background=color_code[1])
+        # 右侧面板：预览区
+        right_panel = ttk.Frame(root, padding="10", relief="sunken")
+        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-        ttk.Button(frame, text=text, command=pick_color).pack(side=tk.LEFT, padx=5)
-        color_display = tk.Label(frame, text="  ", background=initial_color, relief="sunken", borderwidth=1)
-        color_display.pack(side=tk.LEFT, ipadx=10)
+        self._setup_controls(left_panel)
+        self._setup_preview(right_panel)
+        
+        # 初始化绘图
+        self.update_preview()
 
-    create_color_picker(options_frame, "背景颜色", color_vars['background'], '#FFFFFF', 0, 0)
-    create_color_picker(options_frame, "染色体颜色", color_vars['chromosome'], '#403A3A', 0, 1)
+    def _setup_controls(self, parent):
+        """设置左侧控制面板"""
+        # 1. 基因输入
+        gene_frame = ttk.LabelFrame(parent, text="基因定义", padding="10")
+        gene_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Label(gene_frame, text="左染色体", font="-weight bold").grid(row=0, column=1)
+        ttk.Label(gene_frame, text="右染色体", font="-weight bold").grid(row=0, column=2)
+        
+        labels = ["顶部区域", "中间区域", "底部区域"]
+        keys_l = ['left_top', 'left_middle', 'left_bottom']
+        keys_r = ['right_top', 'right_middle', 'right_bottom']
 
-    # --- 染色体标记 ---
-    marker_frame = ttk.Frame(options_frame)
-    marker_frame.grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
-    ttk.Label(marker_frame, text="底部标记:").pack(side=tk.LEFT, padx=(0, 10))
-    ttk.Radiobutton(marker_frame, text="无", variable=marker_choice_var, value="None").pack(side=tk.LEFT)
-    ttk.Radiobutton(marker_frame, text="XY", variable=marker_choice_var, value="XY").pack(side=tk.LEFT)
-    ttk.Radiobutton(marker_frame, text="XX", variable=marker_choice_var, value="XX").pack(side=tk.LEFT)
+        for i, (label, k_l, k_r) in enumerate(zip(labels, keys_l, keys_r)):
+            ttk.Label(gene_frame, text=label).grid(row=i+1, column=0, padx=5, sticky=tk.E)
+            e1 = ttk.Entry(gene_frame, textvariable=self.gene_vars[k_l], width=10)
+            e1.grid(row=i+1, column=1, padx=2, pady=2)
+            e1.bind('<KeyRelease>', self.schedule_update) # 绑定输入事件实现实时预览
+            
+            e2 = ttk.Entry(gene_frame, textvariable=self.gene_vars[k_r], width=10)
+            e2.grid(row=i+1, column=2, padx=2, pady=2)
+            e2.bind('<KeyRelease>', self.schedule_update)
 
-    # --- 保存位置 ---
-    def select_save_path():
-        path = filedialog.asksaveasfilename(
-            initialfile="chromosome_diagram.png",
-            defaultextension=".png",
-            filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")]
-        )
-        if path:
-            save_path_var.set(path)
-            status_var.set(f"准备保存到: {os.path.basename(path)}")
+        # 2. 样式选项
+        style_frame = ttk.LabelFrame(parent, text="样式选项", padding="10")
+        style_frame.pack(fill=tk.X, pady=10)
 
-    save_frame = ttk.Frame(options_frame)
-    save_frame.grid(row=2, column=0, columnspan=2, pady=5, sticky="ew")
-    ttk.Button(save_frame, text="选择保存位置", command=select_save_path).pack(side=tk.LEFT)
-    ttk.Label(save_frame, textvariable=save_path_var, foreground="gray", wraplength=250).pack(side=tk.LEFT, padx=5)
+        self._create_color_picker(style_frame, "背景颜色", self.color_vars['background'], 0)
+        self._create_color_picker(style_frame, "线条颜色", self.color_vars['chromosome'], 1)
 
-    # --- 生成按钮和状态标签 ---
-    def on_generate():
-        file_path = save_path_var.get()
-        if not file_path:
-            select_save_path()
-            file_path = save_path_var.get()
-            if not file_path:
-                status_var.set("已取消。请选择保存位置。")
-                return
+        # 3. 标记
+        marker_frame = ttk.Frame(style_frame)
+        marker_frame.grid(row=2, column=0, columnspan=2, pady=10, sticky=tk.W)
+        ttk.Label(marker_frame, text="底部标记: ").pack(side=tk.LEFT)
+        for val in ["None", "XY", "XX"]:
+            rb = ttk.Radiobutton(marker_frame, text=val, variable=self.marker_choice_var, 
+                                 value=val, command=self.update_preview)
+            rb.pack(side=tk.LEFT, padx=5)
 
-        status_var.set("正在生成...")
-        root.update_idletasks()
+        # 4. 按钮区
+        btn_frame = ttk.Frame(parent)
+        btn_frame.pack(fill=tk.X, pady=20)
+        ttk.Button(btn_frame, text="保存图像", command=self.save_image, style="Accent.TButton").pack(fill=tk.X, ipady=5)
+
+    def _create_color_picker(self, parent, text, var, row):
+        """辅助函数：创建颜色选择器"""
+        def pick():
+            color = colorchooser.askcolor(initialcolor=var.get())[1]
+            if color:
+                var.set(color)
+                btn.config(bg=color) # 更新按钮颜色
+                self.update_preview()
+
+        ttk.Label(parent, text=text).grid(row=row, column=0, padx=5, pady=5, sticky=tk.W)
+        # 使用标准 tk.Button 因为它可以改变背景色
+        btn = tk.Button(parent, bg=var.get(), width=10, command=pick, relief="flat") 
+        btn.grid(row=row, column=1, padx=5, pady=5)
+
+    def _setup_preview(self, parent):
+        """初始化 Matplotlib 预览区域"""
+        # 使用 Figure 而不是 pyplot，避免线程问题
+        self.fig = Figure(figsize=(5, 6), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        
+        self.canvas = FigureCanvasTkAgg(self.fig, master=parent)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def schedule_update(self, event=None):
+        """延迟更新，避免每敲一个字都重绘"""
+        if hasattr(self, '_after_id'):
+            self.root.after_cancel(self._after_id)
+        self._after_id = self.root.after(200, self.update_preview)
+
+    def draw_chromosome_on_ax(self, ax, genes, colors, marker_choice):
+        """核心绘图逻辑，只负责画，不负责保存或创建窗口"""
+        ax.clear()
+        ax.set_facecolor(colors['background'])
+        self.fig.patch.set_facecolor(colors['background'])
+        
+        line_color = colors['chromosome']
+        line_width = 14 # 稍微调小适应预览
+        
+        # 绘图数据结构化 (x_pos, gene_keys)
+        sides = [
+            (0.3, ['left_top', 'left_middle', 'left_bottom'], -0.1), # 左边, 文字偏移量
+            (0.7, ['right_top', 'right_middle', 'right_bottom'], 0.1) # 右边
+        ]
+        
+        y_positions = [0.75, 0.5, 0.25] # 对应 Top, Middle, Bottom
+
+        for x_center, keys, text_offset in sides:
+            # 绘制主干
+            ax.plot([x_center, x_center], [0.1, 0.9], color=line_color, linewidth=line_width, solid_capstyle='round')
+            
+            for key, y_pos in zip(keys, y_positions):
+                gene_text = genes[key]
+                # 只有当有文本或者显式需要画臂时才画横线 (这里假设有文字才画)
+                if gene_text:
+                    # 横线范围
+                    x_start = x_center - 0.1
+                    x_end = x_center + 0.1
+                    ax.plot([x_start, x_end], [y_pos, y_pos], color=line_color, linewidth=line_width, solid_capstyle='round')
+                    
+                    # 绘制文字
+                    # 简单的字体大小逻辑
+                    f_size = 28 if len(gene_text) <= 1 else (20 if len(gene_text) <= 3 else 14)
+                    
+                    text_x = x_center + (text_offset * 2.2) # 让文字离线远一点
+                    ax.text(text_x, y_pos, gene_text, 
+                            fontsize=f_size, fontfamily='serif', va='center', ha='center')
+
+        # 标记
+        if marker_choice == "XY":
+            ax.text(0.3, 0.02, 'X', fontsize=30, ha='center', fontfamily='serif')
+            ax.text(0.7, 0.02, 'Y', fontsize=30, ha='center', fontfamily='serif')
+        elif marker_choice == "XX":
+            ax.text(0.3, 0.02, 'X', fontsize=30, ha='center', fontfamily='serif')
+            ax.text(0.7, 0.02, 'X', fontsize=30, ha='center', fontfamily='serif')
+
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis('off')
+
+    def update_preview(self):
+        """收集数据并刷新预览"""
         try:
-            genes_to_draw = {key: var.get().strip() for key, var in gene_vars.items()}
-            colors_to_draw = {key: var.get() for key, var in color_vars.items()}
-            marker_choice = marker_choice_var.get()
-            draw_chromosome(genes_to_draw, colors_to_draw, marker_choice, file_path)
-            status_var.set(f"图像已保存到: {os.path.basename(file_path)}")
+            genes = {k: v.get().strip() for k, v in self.gene_vars.items()}
+            colors = {k: v.get() for k, v in self.color_vars.items()}
+            marker = self.marker_choice_var.get()
+            
+            self.draw_chromosome_on_ax(self.ax, genes, colors, marker)
+            self.canvas.draw()
         except Exception as e:
-            status_var.set(f"发生错误: {e}")
+            print(f"Preview error: {e}")
 
-    ttk.Button(main_frame, text="生成图像", command=on_generate, style="Accent.TButton").grid(row=2, column=0, columnspan=2, pady=10)
-    ttk.Label(main_frame, textvariable=status_var, foreground="gray").grid(row=3, column=0, columnspan=2)
-    
-    style = ttk.Style(root)
-    style.configure("Accent.TButton", font="-weight bold")
-
-    root.mainloop()
+    def save_image(self):
+        """保存当前预览的图像"""
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png"), ("PDF files", "*.pdf"), ("All files", "*.*")]
+        )
+        if file_path:
+            try:
+                # 保存 figure 对象
+                self.fig.savefig(file_path, dpi=300, facecolor=self.fig.get_facecolor())
+                messagebox.showinfo("成功", f"图像已保存:\n{file_path}")
+            except Exception as e:
+                messagebox.showerror("错误", f"保存失败:\n{e}")
 
 if __name__ == '__main__':
-    create_gui()
+    root = tk.Tk()
+    # 设置样式
+    style = ttk.Style()
+    style.configure("Accent.TButton", font=("Helvetica", 12, "bold"))
+    
+    app = ChromosomeApp(root)
+    root.mainloop()
