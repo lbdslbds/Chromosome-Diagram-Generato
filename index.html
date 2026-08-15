@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基因染色体绘图生成器 | Chromosome Diagram Generator</title>
+  <meta name="description" content="在线高颜值基因染色体示意图与细胞遗传图谱绘制工具，支持细胞外框圆圈、同源染色体、等位基因位点、着丝粒、性染色体标记及高清PNG/SVG矢量导出。">
+  <meta name="keywords" content="染色体绘图, 细胞外框, 基因图谱, 遗传学试题, 高考生物, 孟德尔遗传, 摩尔根连锁, 伴性遗传, 生物学教学, Chromosome Diagram, SVG, PNG">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <img src="favicon.svg" alt="Logo" width="32" height="32">
+      </div>
+      <div>
+        <h1 class="brand-title">
+          <span data-i18n="appTitle">基因染色体绘图生成器</span>
+          <span class="brand-badge" data-i18n="appSubtitle">网页版</span>
+        </h1>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Reset Button -->
+      <button id="btn-reset" class="btn btn-sm" data-i18n-title="resetBtn" title="重置">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+        <span data-i18n="resetBtn">重置</span>
+      </button>
+
+      <!-- Share Link -->
+      <button id="btn-share" class="btn btn-sm" data-i18n-title="shareUrl" title="分享配置链接">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+        </svg>
+        <span data-i18n="shareUrl">分享</span>
+      </button>
+
+      <!-- Language Toggle -->
+      <button id="btn-lang-toggle" class="btn btn-sm" data-i18n-title="langToggle" title="切换语言">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span id="lang-btn-text">EN</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button id="btn-theme-toggle" class="btn btn-icon" data-i18n-title="themeToggle" title="切换主题">
+        <span id="theme-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </span>
+      </button>
+
+      <!-- GitHub Link -->
+      <a href="https://github.com/lbdslbds/Chromosome-Diagram-Generato" target="_blank" rel="noopener noreferrer" class="btn btn-icon" title="GitHub Repository">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- Left Controls Sidebar -->
+    <aside class="sidebar">
+      <!-- Tabs Header -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="loci">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="3" x2="12" y2="21"></line>
+            <line x1="8" y1="8" x2="16" y2="8"></line>
+            <line x1="8" y1="16" x2="16" y2="16"></line>
+          </svg>
+          <span data-i18n="tabLoci">基因位点</span>
+        </button>
+
+        <button class="tab-btn" data-tab="cell">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+          </svg>
+          <span data-i18n="tabCell">细胞外框</span>
+        </button>
+
+        <button class="tab-btn" data-tab="style">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a7 7 0 0 0 7 7c0 2-2 3-2 3s-1 1-1 3"></path>
+          </svg>
+          <span data-i18n="tabStyle">形态与样式</span>
+        </button>
+
+        <button class="tab-btn" data-tab="markers">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z"></path>
+          </svg>
+          <span data-i18n="tabMarkers">标记与注释</span>
+        </button>
+
+        <button class="tab-btn" data-tab="presets">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span data-i18n="tabPresets">经典预设</span>
+        </button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div class="tab-content-container">
+
+        <!-- Tab 1: 基因位点 (Gene Loci) -->
+        <div id="tab-loci" class="tab-pane active">
+          <!-- Morphological Mode -->
+          <div class="card-section">
+            <div class="card-title" data-i18n="modeLabel">染色体形态</div>
+            <div class="segmented-control">
+              <input type="radio" name="chromMode" id="mode-pair" value="pair" checked>
+              <label for="mode-pair" data-i18n="modePair">同源双染色体</label>
+
+              <input type="radio" name="chromMode" id="mode-single" value="single">
+              <label for="mode-single" data-i18n="modeSingle">单条染色体</label>
+
+              <input type="radio" name="chromMode" id="mode-replicated" value="replicated">
+              <label for="mode-replicated" data-i18n="modeReplicated">姐妹单体</label>
+            </div>
+          </div>
+
+          <!-- Loci Inputs Table -->
+          <div class="card-section">
+            <div class="card-title">
+              <span data-i18n="tabLoci">基因位点列表</span>
+              <button id="btn-add-locus" class="btn btn-sm btn-accent-ghost" data-i18n="addLocusBtn">+ 添加位点</button>
+            </div>
+
+            <div class="loci-table">
+              <div class="loci-header">
+                <span id="loci-header-left" data-i18n="leftChrom">左染色体</span>
+                <span id="loci-header-right" data-i18n="rightChrom">右染色体</span>
+                <span>操作</span>
+              </div>
+              <div id="loci-container">
+                <!-- Dynamic Loci Rows generated by app.js -->
+              </div>
+            </div>
+
+            <!-- Quick Symbol Toolbar -->
+            <div class="symbol-bar">
+              <span style="font-size:0.75rem; color:var(--text-muted); width:100%;" data-i18n="quickSymbols">快速插入符号 (光标处):</span>
+              <button class="symbol-btn" data-symbol="^+">⁺</button>
+              <button class="symbol-btn" data-symbol="^-">⁻</button>
+              <button class="symbol-btn" data-symbol="^r">ʳ</button>
+              <button class="symbol-btn" data-symbol="^s">ˢ</button>
+              <button class="symbol-btn" data-symbol="^A">ᴬ</button>
+              <button class="symbol-btn" data-symbol="^B">ᴮ</button>
+              <button class="symbol-btn" data-symbol="^w">ʷ</button>
+              <button class="symbol-btn" data-symbol="_1">₁</button>
+              <button class="symbol-btn" data-symbol="_2">₂</button>
+              <button class="symbol-btn" data-symbol="♀">♀</button>
+              <button class="symbol-btn" data-symbol="♂">♂</button>
+              <button class="symbol-btn" data-symbol="′">′</button>
+              <button class="symbol-btn" data-symbol="α">α</button>
+              <button class="symbol-btn" data-symbol="β">β</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 细胞外框 (Cell Membrane) -->
+        <div id="tab-cell" class="tab-pane">
+          <div class="card-section">
+            <div class="card-title">
+              <span data-i18n="cellTitle">细胞外框 (Cell Membrane)</span>
+            </div>
+
+            <!-- Show Cell Toggle -->
+            <div class="form-group" style="display:flex; align-items:center; gap:0.6rem; padding:0.4rem 0;">
+              <input type="checkbox" id="show-cell-toggle" style="width:18px; height:18px; cursor:pointer;" checked>
+              <label for="show-cell-toggle" style="font-size:0.9rem; font-weight:600; cursor:pointer;" data-i18n="showCell">显示细胞外框圈 (生物试题/教材标准)</label>
+            </div>
+
+            <div id="cell-details-wrap">
+              <!-- Cell Shape -->
+              <div class="form-group" style="margin-top:0.75rem;">
+                <label class="form-label" data-i18n="cellShape">细胞形状</label>
+                <div class="segmented-control">
+                  <input type="radio" name="cellShape" id="shape-circle" value="circle" checked>
+                  <label for="shape-circle" data-i18n="cellShapeCircle">圆形</label>
+
+                  <input type="radio" name="cellShape" id="shape-oval" value="oval">
+                  <label for="shape-oval" data-i18n="cellShapeOval">椭圆</label>
+
+                  <input type="radio" name="cellShape" id="shape-rounded" value="rounded">
+                  <label for="shape-rounded" data-i18n="cellShapeRounded">圆角矩形</label>
+                </div>
+              </div>
+
+              <!-- Line Style -->
+              <div class="form-group">
+                <label class="form-label" data-i18n="cellBorderStyle">线条样式</label>
+                <div class="segmented-control">
+                  <input type="radio" name="cellBorderStyle" id="border-solid" value="solid" checked>
+                  <label for="border-solid" data-i18n="cellBorderSolid">实线 (正常细胞)</label>
+
+                  <input type="radio" name="cellBorderStyle" id="border-dashed" value="dashed">
+                  <label for="border-dashed" data-i18n="cellBorderDashed">虚线 (核膜解体/分裂)</label>
+                </div>
+              </div>
+
+              <!-- Border Width Slider -->
+              <div class="form-group">
+                <div class="form-label">
+                  <span data-i18n="cellBorderWidth">细胞边框粗细</span>
+                  <span id="cell-border-width-val" class="range-val">3px</span>
+                </div>
+                <div class="range-slider-container">
+                  <input type="range" id="cell-border-width-slider" class="range-slider" min="1" max="8" step="1" value="3">
+                </div>
+              </div>
+
+              <!-- Cell Radius / Size Slider -->
+              <div class="form-group">
+                <div class="form-label">
+                  <span data-i18n="cellRadius">细胞大小 / 比例</span>
+                  <span id="cell-radius-val" class="range-val">80%</span>
+                </div>
+                <div class="range-slider-container">
+                  <input type="range" id="cell-radius-slider" class="range-slider" min="0.30" max="0.48" step="0.01" value="0.40">
+                </div>
+              </div>
+
+              <!-- Cell Border Color -->
+              <div class="form-group color-picker-wrap">
+                <label class="form-label" style="margin:0; flex:1;" data-i18n="cellBorderColor">边框颜色</label>
+                <input type="color" id="cell-border-color" class="color-input" value="#334155">
+                <input type="text" id="cell-border-color-text" class="form-control form-control-sm color-text" value="#334155">
+              </div>
+
+              <!-- Cytoplasm Fill Color -->
+              <div class="form-group color-picker-wrap" style="margin-top:0.75rem;">
+                <label class="form-label" style="margin:0; flex:1;" data-i18n="cellFill">细胞质填充颜色</label>
+                <input type="color" id="cell-fill-color" class="color-input" value="#FFFFFF">
+                <input type="text" id="cell-fill-color-text" class="form-control form-control-sm color-text" value="#FFFFFF">
+              </div>
+
+              <!-- Cell Stage Label -->
+              <div class="form-group" style="margin-top:0.75rem;">
+                <label class="form-label" data-i18n="cellStageLabel">细胞类型 / 时期标注 (底部显示)</label>
+                <input type="text" id="cell-stage-input" class="form-control" placeholder="如: 精原细胞 (AaBb)" data-i18n-placeholder="cellStagePlaceholder">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: 形态与样式 (Style & Appearance) -->
+        <div id="tab-style" class="tab-pane">
+          <!-- Color Section -->
+          <div class="card-section">
+            <div class="card-title" data-i18n="colorMode">配色方案</div>
+
+            <div class="form-group">
+              <div class="segmented-control">
+                <input type="radio" name="colorMode" id="color-unified" value="unified" checked>
+                <label for="color-unified" data-i18n="colorUnified">统一单色</label>
+
+                <input type="radio" name="colorMode" id="color-separate" value="separate">
+                <label for="color-separate" data-i18n="colorSeparate">左右分色</label>
+              </div>
+            </div>
+
+            <!-- Unified Color Input -->
+            <div id="color-unified-wrap" class="form-group color-picker-wrap">
+              <label class="form-label" style="margin:0; flex:1;" data-i18n="chromColor">染色体线条颜色</label>
+              <input type="color" id="chrom-color" class="color-input" value="#1E293B">
+              <input type="text" id="chrom-color-text" class="form-control form-control-sm color-text" value="#1E293B">
+            </div>
+
+            <!-- Separate Colors Inputs -->
+            <div id="color-separate-wrap" style="display:none; gap:0.5rem; flex-direction:column;">
+              <div class="form-group color-picker-wrap">
+                <label class="form-label" style="margin:0; flex:1;" data-i18n="chromColorL">左侧颜色 (父本)</label>
+                <input type="color" id="chrom-color-l" class="color-input" value="#2563EB">
+                <input type="text" id="chrom-color-l-text" class="form-control form-control-sm color-text" value="#2563EB">
+              </div>
+              <div class="form-group color-picker-wrap">
+                <label class="form-label" style="margin:0; flex:1;" data-i18n="chromColorR">右侧颜色 (母本)</label>
+                <input type="color" id="chrom-color-r" class="color-input" value="#DC2626">
+                <input type="text" id="chrom-color-r-text" class="form-control form-control-sm color-text" value="#DC2626">
+              </div>
+            </div>
+
+            <!-- Text / Label Color -->
+            <div class="form-group color-picker-wrap" style="margin-top:0.75rem;">
+              <label class="form-label" style="margin:0; flex:1;">基因文字颜色</label>
+              <input type="color" id="text-color" class="color-input" value="#1E293B">
+              <input type="text" id="text-color-text" class="form-control form-control-sm color-text" value="#1E293B">
+            </div>
+
+            <!-- Background Color -->
+            <div class="form-group color-picker-wrap" style="margin-top:0.75rem;">
+              <label class="form-label" style="margin:0; flex:1;" data-i18n="bgColor">画布背景颜色</label>
+              <input type="color" id="bg-color" class="color-input" value="#FFFFFF">
+              <input type="text" id="bg-color-text" class="form-control form-control-sm color-text" value="#FFFFFF">
+            </div>
+
+            <!-- Transparent Toggle -->
+            <div class="form-group" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+              <input type="checkbox" id="transparent-bg" style="width:16px; height:16px; cursor:pointer;">
+              <label for="transparent-bg" style="font-size:0.85rem; cursor:pointer; font-weight:500;" data-i18n="transparentBg">透明背景 (适合导出后嵌入 PPT/试卷)</label>
+            </div>
+          </div>
+
+          <!-- Geometry & Proportions -->
+          <div class="card-section">
+            <div class="card-title">比例与尺寸精细微调</div>
+
+            <!-- Line Width -->
+            <div class="form-group">
+              <div class="form-label">
+                <span data-i18n="lineWidth">染色体粗细</span>
+                <span id="line-width-val" class="range-val">15px</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="line-width-slider" class="range-slider" min="6" max="30" step="1" value="15">
+              </div>
+            </div>
+
+            <!-- Height -->
+            <div class="form-group">
+              <div class="form-label">
+                <span data-i18n="chromHeight">染色体长度</span>
+                <span id="chrom-height-val" class="range-val">54%</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="chrom-height-slider" class="range-slider" min="0.35" max="0.80" step="0.01" value="0.54">
+              </div>
+            </div>
+
+            <!-- Spacing -->
+            <div class="form-group">
+              <div class="form-label">
+                <span data-i18n="chromSpacing">双染色体间距</span>
+                <span id="chrom-spacing-val" class="range-val">22%</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="chrom-spacing-slider" class="range-slider" min="0.12" max="0.45" step="0.01" value="0.22">
+              </div>
+            </div>
+
+            <!-- Arm Width -->
+            <div class="form-group">
+              <div class="form-label">
+                <span data-i18n="armWidth">横臂长度</span>
+                <span id="arm-width-val" class="range-val">6%</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="arm-width-slider" class="range-slider" min="0.03" max="0.14" step="0.005" value="0.065">
+              </div>
+            </div>
+          </div>
+
+          <!-- Centromere & Structure -->
+          <div class="card-section">
+            <div class="card-title" data-i18n="centromereStyle">着丝粒 (Centromere)</div>
+
+            <div class="form-group">
+              <div class="segmented-control">
+                <input type="radio" name="centromere" id="cent-none" value="none">
+                <label for="cent-none" data-i18n="centromereNone">无</label>
+
+                <input type="radio" name="centromere" id="cent-constriction" value="constriction" checked>
+                <label for="cent-constriction" data-i18n="centromereConstriction">初级缢痕</label>
+
+                <input type="radio" name="centromere" id="cent-dot" value="dot">
+                <label for="cent-dot" data-i18n="centromereDot">圆点标记</label>
+              </div>
+            </div>
+
+            <div id="centromere-pos-group" class="form-group">
+              <div class="form-label">
+                <span data-i18n="centromerePos">着丝粒位置 (顶部~底部)</span>
+                <span id="centromere-pos-val" class="range-val">50%</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="centromere-pos-slider" class="range-slider" min="0.1" max="0.9" step="0.05" value="0.50">
+              </div>
+            </div>
+          </div>
+
+          <!-- Typography -->
+          <div class="card-section">
+            <div class="card-title" data-i18n="fontFamily">字体设置</div>
+
+            <div class="form-group">
+              <label class="form-label" data-i18n="fontFamily">字体风格</label>
+              <select id="font-family-select" class="form-control">
+                <option value="serif" selected data-i18n="fontSerif">学术衬线体 (Serif / Times New Roman)</option>
+                <option value="sans" data-i18n="fontSans">现代无衬线 (Sans-serif / Inter)</option>
+                <option value="mono" data-i18n="fontMono">等宽字体 (Monospace)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" data-i18n="fontStyle">字形样式</label>
+              <div class="segmented-control">
+                <input type="radio" name="fontStyle" id="style-regular" value="regular">
+                <label for="style-regular" data-i18n="styleRegular">常规</label>
+
+                <input type="radio" name="fontStyle" id="style-italic" value="italic" checked>
+                <label for="style-italic" data-i18n="styleItalic">斜体 (基因规范)</label>
+
+                <input type="radio" name="fontStyle" id="style-bold" value="bold">
+                <label for="style-bold" data-i18n="styleBold">粗体</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">
+                <span data-i18n="fontSizeScale">基因字体大小缩放</span>
+                <span id="font-size-scale-val" class="range-val">1.0x</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="font-size-scale-slider" class="range-slider" min="0.6" max="1.5" step="0.05" value="1.0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: 标记与注释 (Markers & Labels) -->
+        <div id="tab-markers" class="tab-pane">
+          <!-- Sex Chromosome Markers -->
+          <div class="card-section">
+            <div class="card-title" data-i18n="bottomMarker">底部性染色体标记</div>
+
+            <div class="form-group">
+              <div class="segmented-control" style="flex-wrap:wrap;">
+                <input type="radio" name="markerChoice" id="marker-none" value="None" checked>
+                <label for="marker-none" data-i18n="markerNone">无</label>
+
+                <input type="radio" name="markerChoice" id="marker-xy" value="XY">
+                <label for="marker-xy">XY (雄)</label>
+
+                <input type="radio" name="markerChoice" id="marker-xx" value="XX">
+                <label for="marker-xx">XX (雌)</label>
+
+                <input type="radio" name="markerChoice" id="marker-zw" value="ZW">
+                <label for="marker-zw">ZW</label>
+
+                <input type="radio" name="markerChoice" id="marker-zz" value="ZZ">
+                <label for="marker-zz">ZZ</label>
+
+                <input type="radio" name="markerChoice" id="marker-custom" value="Custom">
+                <label for="marker-custom" data-i18n="markerCustom">自定义</label>
+              </div>
+            </div>
+
+            <!-- Custom Marker Inputs -->
+            <div id="custom-marker-inputs" class="form-group" style="display:none; gap:0.5rem;">
+              <input type="text" id="marker-custom-l" class="form-control" placeholder="左侧标记 (如 ♂ 或 X)">
+              <input type="text" id="marker-custom-r" class="form-control" placeholder="右侧标记 (如 ♀ 或 Y)">
+            </div>
+
+            <!-- Marker Size & Color -->
+            <div class="form-group">
+              <div class="form-label">
+                <span data-i18n="markerSize">标记字号</span>
+                <span id="marker-size-val" class="range-val">26px</span>
+              </div>
+              <div class="range-slider-container">
+                <input type="range" id="marker-size-slider" class="range-slider" min="16" max="42" step="2" value="26">
+              </div>
+            </div>
+
+            <div class="form-group color-picker-wrap">
+              <label class="form-label" style="margin:0; flex:1;" data-i18n="markerColor">标记文字颜色</label>
+              <input type="color" id="marker-color" class="color-input" value="#1E293B">
+              <input type="text" id="marker-color-text" class="form-control form-control-sm color-text" value="#1E293B">
+            </div>
+          </div>
+
+          <!-- Diagram Title / Header Note -->
+          <div class="card-section">
+            <div class="card-title" data-i18n="titleLabel">顶部图题 / 题目说明 (可选)</div>
+            <div class="form-group">
+              <input type="text" id="diagram-title-input" class="form-control" placeholder="例如: 图 1: 某雄性动物减数分裂示意图" data-i18n-placeholder="titlePlaceholder">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: 经典预设 (Presets) -->
+        <div id="tab-presets" class="tab-pane">
+          <div class="card-section">
+            <div class="card-title" data-i18n="tabPresets">经典遗传学预设库</div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem;">点击预设卡片即可一键加载高考/生物竞赛/科研级染色体配置：</p>
+            <div id="presets-grid" class="presets-grid">
+              <!-- Dynamically populated presets -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Right Live Preview Stage -->
+    <section class="preview-stage">
+      <!-- Top Stage Toolbar -->
+      <div class="stage-toolbar">
+        <div class="stage-tools-left">
+          <button id="btn-zoom-out" class="btn btn-sm" title="缩小" data-i18n-title="zoomOut">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+          <span id="zoom-display" class="range-val" style="font-size:0.8rem; min-width:3rem; text-align:center;">100%</span>
+          <button id="btn-zoom-in" class="btn btn-sm" title="放大" data-i18n-title="zoomIn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+          <button id="btn-zoom-reset" class="btn btn-sm" title="适应大小" data-i18n-title="zoomFit">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h6v6"></path>
+              <path d="M9 21H3v-6"></path>
+              <path d="M21 3l-7 7"></path>
+              <path d="M3 21l7-7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="stage-tools-right">
+          <span style="font-size:0.8rem; color:var(--text-muted);" data-i18n="selectRes">导出分辨率:</span>
+          <select id="export-res-select" class="form-control form-control-sm" style="width:auto;">
+            <option value="1" data-i18n="res1x">标准 (1x - 750×750)</option>
+            <option value="2" selected data-i18n="res2x">高清 (2x - 1500×1500)</option>
+            <option value="4" data-i18n="res4x">印刷级超清 (4x 300DPI)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main Canvas Viewport -->
+      <div class="viewport-container">
+        <div id="canvas-wrapper" class="canvas-wrapper">
+          <canvas id="chromosome-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Floating Action Bar -->
+      <div class="floating-actions">
+        <!-- Copy to Clipboard -->
+        <button id="btn-copy-image" class="btn btn-accent-ghost" data-i18n-title="copyImage" title="一键复制图片到剪贴板，可直接粘贴进 Word / PPT">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span data-i18n="copyImage">复制到剪贴板</span>
+        </button>
+
+        <div class="divider-v"></div>
+
+        <!-- Export PNG -->
+        <button id="btn-export-png" class="btn btn-primary" data-i18n-title="exportPng" title="导出高分辨率 PNG 图像">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span data-i18n="exportPng">导出 PNG</span>
+        </button>
+
+        <!-- Export SVG -->
+        <button id="btn-export-svg" class="btn" data-i18n-title="exportSvg" title="导出矢量 SVG 文件，可在 AI / Inkscape 中无损编辑">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span data-i18n="exportSvg">导出 SVG 矢量</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
